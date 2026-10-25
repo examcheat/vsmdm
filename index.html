@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MWC_Practicals - Visual Studio Code</title>
+<style>
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:#1e1e1e;color:#ccc;font:13px/1.4 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;overflow:hidden}
+::-webkit-scrollbar{width:14px;height:14px}
+::-webkit-scrollbar-thumb{background:rgba(121,121,121,.4)}
+::-webkit-scrollbar-thumb:hover{background:rgba(100,100,100,.7)}
+::-webkit-scrollbar-corner{background:#1e1e1e}
+.app{display:flex;height:calc(100% - 22px)}
+/* activity bar */
+.act{width:48px;flex:none;background:#2c2c2c;display:flex;flex-direction:column;justify-content:space-between}
+.act>div{display:flex;flex-direction:column;align-items:center}
+.ai{width:48px;height:48px;display:flex;align-items:center;justify-content:center;border-left:2px solid transparent;color:#858585;cursor:pointer;position:relative}
+.ai:hover{color:#fff}.ai.on{color:#fff;border-left-color:#fff}
+.ai svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.vsb{position:absolute;right:7px;bottom:8px;background:#0078d4;color:#fff;font:700 8px/1 Arial;padding:2px 3px;border-radius:6px}
+/* editor groups */
+.groups{flex:1;min-width:0;display:flex}
+.grp{display:flex;flex-direction:column;min-width:0;min-height:0;border-left:1px solid #252526;overflow:hidden}
+#g1{flex:1.35 1 0}#g2{flex:1 1 0}
+.tabs{height:35px;flex:none;background:#252526;display:flex;justify-content:space-between;align-items:stretch;min-width:0}
+.tl{display:flex;overflow-x:auto;scrollbar-width:none;min-width:0}
+.tl::-webkit-scrollbar{display:none}
+.tab{flex:none;display:flex;align-items:center;gap:6px;padding:0 10px;background:#2d2d2d;color:#969696;border-right:1px solid #252526;cursor:pointer;white-space:nowrap;font-size:13px}
+.tab.on{background:#1e1e1e;color:#fff}
+.tab .x{visibility:hidden;color:#c5c5c5;font-size:16px;margin-left:4px;line-height:1}
+.tab.on .x,.tab:hover .x{visibility:visible}
+.ic{font:600 10px/1 Arial;color:#519aba}
+.ic.pvi{color:#75beff;font-size:13px}
+.tact{display:flex;align-items:center;gap:12px;padding:0 10px;color:#c5c5c5;flex:none;font-size:16px}
+.cpb{background:#0e639c;color:#fff;border:0;border-radius:2px;padding:4px 10px;font:12px "Segoe UI",system-ui,sans-serif;cursor:pointer}
+.cpb:hover{background:#1177bb}.cpb.ok{background:#388a34}
+.bc{height:22px;flex:none;display:flex;align-items:center;gap:5px;padding:0 14px;color:#a9a9a9;font-size:13px;white-space:nowrap;overflow:hidden;background:#1e1e1e}
+.sep{color:#858585}
+/* code */
+.ed{flex:1;min-height:0;overflow:auto;font:14px/20px Consolas,"Cascadia Mono","Courier New",monospace;background:#1e1e1e;color:#d4d4d4;padding:6px 0 60px}
+.rows{min-width:max-content}
+.row{display:flex;height:20px;white-space:pre}
+.row.cur{box-shadow:inset 0 0 0 2px #282828}
+.ln{position:sticky;left:0;flex:none;width:70px;padding-right:26px;text-align:right;color:#858585;background:#1e1e1e;user-select:none;-webkit-user-select:none}
+.row.cur .ln{color:#c6c6c6}
+.lc{flex:none;padding-right:40px}
+.cm{color:#6a9955;font-style:normal}.st{color:#ce9178;font-style:normal}.nm{color:#b5cea8;font-style:normal}
+.kc{color:#c586c0;font-style:normal}.kk{color:#569cd6;font-style:normal}.fn{color:#dcdcaa;font-style:normal}.va{color:#9cdcfe;font-style:normal}
+/* preview */
+.pv{flex:1;min-height:0;overflow:auto;padding:4px 26px 60px;background:#1e1e1e;color:#d4d4d4;font:15px/1.6 -apple-system,"Segoe UI",system-ui,sans-serif}
+.pv h2{font-size:24px;font-weight:600;margin:26px 0 12px;color:#fff;line-height:1.3}
+.pv p{margin:0 0 12px}
+.pv a{color:#3794ff;text-decoration:none}
+.bdg{display:inline-flex;font:600 11px/20px Verdana,Arial,sans-serif;border-radius:3px;overflow:hidden;margin:10px 6px 0 0}
+.bdg b{background:#555;color:#fff;padding:0 6px;font-weight:600}.bdg i{background:#dfb317;color:#fff;font-style:normal;padding:0 6px}
+.pv code{background:rgba(10,10,10,.4);color:#d7ba7d;padding:1px 5px;border-radius:3px;font:14px Consolas,"Courier New",monospace}
+.pv pre{background:rgba(10,10,10,.5);padding:12px 14px;border-radius:4px;overflow:auto;font:13px/1.5 Consolas,"Courier New",monospace;color:#d4d4d4;margin:0 0 12px}
+/* status bar */
+.sb{position:fixed;left:0;right:0;bottom:0;height:22px;background:#007acc;color:#fff;display:flex;justify-content:space-between;align-items:stretch;font-size:12px;z-index:5;overflow:hidden;white-space:nowrap}
+.sb>div{display:flex}
+.sb span{display:flex;align-items:center;padding:0 8px;gap:4px;cursor:default}
+.sb span:hover{background:rgba(255,255,255,.12)}
+.sb .rem{background:#16825d}
+@media(max-width:820px){
+ .act{display:none}.groups{flex-direction:column}
+ .grp{border-left:0;border-top:1px solid #252526}
+ #g1{flex:1.3 1 0}#g2{flex:1 1 0}
+ .ed{font-size:12px}.ln{width:54px;padding-right:14px}
+ .pv{font-size:14px;padding:4px 14px 40px}
+ .hide{display:none!important}
+}
+</style></head><body>
+<div class="app">
+ <div class="act">
+  <div>
+   <div class="ai on" title="Explorer"><svg viewBox="0 0 24 24"><path d="M8 3h8l4 4v11H8z"/><path d="M5 7v14h11"/></svg></div>
+   <div class="ai" title="Search"><svg viewBox="0 0 24 24"><circle cx="14" cy="10" r="5"/><path d="M10.5 13.5L4 20"/></svg></div>
+   <div class="ai" title="Source Control"><svg viewBox="0 0 24 24"><circle cx="6" cy="5" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="8" r="2"/><path d="M6 7v10M18 10c0 4-6 3-12 7"/></svg></div>
+   <div class="ai" title="Run and Debug"><svg viewBox="0 0 24 24"><path d="M9 4l11 8-11 8z"/><circle cx="5" cy="17" r="2"/></svg></div>
+   <div class="ai" title="Extensions"><svg viewBox="0 0 24 24"><rect x="4" y="11" width="7" height="7"/><rect x="11" y="11" width="7" height="7"/><rect x="4" y="18" width="7" height="0.1"/><rect x="11" y="4" width="7" height="7"/></svg></div>
+  </div>
+  <div>
+   <div class="ai" title="Accounts"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="10" r="3"/><path d="M6.5 18c1.5-3 9.500-3 11 0"/></svg></div>
+   <div class="ai" title="Manage"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="3 2.2"/></svg><span class="vsb">VS</span></div>
+  </div>
+ </div>
+ <div class="groups">
+  <div class="grp" id="g1">
+   <div class="tabs"><div class="tl" id="tl"></div><div class="tact"><button class="cpb" id="cpb">⧉ Copy code</button><span>⋯</span></div></div>
+   <div class="bc" id="bc"></div>
+   <div class="ed" id="ed"></div>
+  </div>
+  <div class="grp" id="g2">
+   <div class="tabs"><div class="tl"><div class="tab on"><span class="ic pvi">⧉</span><span id="ptn"></span><span class="x">×</span></div></div><div class="tact"><span>◫</span><span>⋯</span></div></div>
+   <div class="pv" id="pv"></div>
+  </div>
+ </div>
+</div>
+<div class="sb">
+ <div><span class="rem">&gt;&lt;</span><span>⎇ main</span><span class="hide">⊗ 0 &nbsp;⚠ 0</span></div>
+ <div><span id="ln">Ln 1, Col 1</span><span class="hide">Spaces: 4</span><span class="hide">UTF-8</span><span class="hide">LF</span><span>Python</span><span>✓ <i id="clk" style="font-style:normal"></i></span></div>
+</div>
+<script>
+const FS=String.raw`import numpy as np
+import matplotlib.pyplot as plt
+
+# ---------- Free-space path loss ----------
+# FSPL (dB) = 20*log10(d_km) + 20*log10(f_MHz) + 32.44
+def fspl(d_m, f_mhz):
+    return 20*np.log10(d_m/1000) + 20*np.log10(f_mhz) + 32.44
+
+# I & II. Path loss vs distance (1 m to 50 m) at @F1@ MHz and @F2@ MHz
+d = np.arange(1, 51)
+plt.figure(figsize=(7,4))
+for f in (@F1@, @F2@):
+    plt.plot(d, fspl(d, f), label=f'{f} MHz')
+plt.xlabel('Distance (m)'); plt.ylabel('Path loss (dB)')
+plt.title('FSPL vs Distance'); plt.grid(True); plt.legend(); plt.show()
+
+# III & IV. Path loss vs frequency (@F1@ to @F2@ MHz) at @D1@ m and @D2@ m
+f = np.arange(@F1@, @F2@ + 1)
+plt.figure(figsize=(7,4))
+for dist in (@D1@, @D2@):
+    plt.plot(f, fspl(dist, f), label=f'{dist} m')
+plt.xlabel('Frequency (MHz)'); plt.ylabel('Path loss (dB)')
+plt.title('FSPL vs Frequency'); plt.grid(True); plt.legend(); plt.show()
+
+print('FSPL @10 m,', @F1@, 'MHz =', round(fspl(10, @F1@), 2), 'dB')
+print('FSPL @10 m,', @F2@, 'MHz =', round(fspl(10, @F2@), 2), 'dB')
+print('FSPL @@D1@ m,', @F1@, 'MHz =', round(fspl(@D1@, @F1@), 2), 'dB')
+print('FSPL @@D2@ m,', @F1@, 'MHz =', round(fspl(@D2@, @F1@), 2), 'dB')
+
+# V. COMMENTS / CONCLUSION
+# - Path loss grows with log of distance: doubling distance adds ~6 dB.
+# - Path loss grows with log of frequency: the higher frequency has more loss at the same distance.
+# - Distance has the larger effect; curves are logarithmic (steep at first, then flatten).
+# - The two frequency curves are parallel; the gap is 20*log10(f2/f1) dB.
+# VIVA Q&A
+# Q1. What is FSPL? A: Power loss of a signal travelling in free space (line of sight, no obstacles).
+# Q2. Why is loss higher at higher frequency? A: Smaller antenna aperture (wavelength = c/f), so less power is captured.
+# Q3. Effect of doubling distance? A: +6 dB loss. Doubling frequency also gives +6 dB.
+# Q4. Why is lower frequency preferred for coverage? A: Lower path loss, so longer range.
+# Q5. Unit of path loss? A: dB (ratio of transmitted to received power).`;
+const gen=(f1,f2,d1,d2)=>FS.replace(/@@D1@/g,'@'+d1).replace(/@@D2@/g,'@'+d2).replace(/@F1@/g,f1).replace(/@F2@/g,f2).replace(/@D1@/g,d1).replace(/@D2@/g,d2);
+
+const Q=[
+{t:"Q1. Digital communication system (Tx, Channel, Rx)",q:"Simulate Tx, AWGN channel and Rx in Python:\nI. Generate a clean sine wave at the transmitter.\nII. Add AWGN to simulate channel noise.\nIII. Apply a sliding-window moving-average filter at the receiver.\nIV. Plot transmitted, noisy and recovered signals in three separate graphs.",code:String.raw`import numpy as np
+import matplotlib.pyplot as plt
+
+fs, f = 1000, 5                       # sampling rate (Hz), signal frequency (Hz)
+t = np.arange(0, 1, 1/fs)
+
+# I. Transmitter: clean sine wave
+tx = np.sin(2*np.pi*f*t)
+
+# II. Channel: AWGN (zero-mean Gaussian noise) at chosen SNR
+snr_db = 10
+noise_power = np.mean(tx**2) / 10**(snr_db/10)
+noisy = tx + np.sqrt(noise_power) * np.random.randn(len(t))
+
+# III. Receiver: sliding-window moving average (window = W samples)
+W = 25
+rx = np.convolve(noisy, np.ones(W)/W, mode='same')
+
+# IV. Three separate graphs
+for sig, title, col in [(tx, 'Transmitted signal', 'b'),
+                        (noisy, 'Noisy channel output (AWGN)', 'r'),
+                        (rx, 'Recovered signal (moving average)', 'g')]:
+    plt.figure(figsize=(8,3))
+    plt.plot(t, sig, col); plt.title(title)
+    plt.xlabel('Time (s)'); plt.ylabel('Amplitude'); plt.grid(True); plt.show()
+
+# VIVA Q&A
+# Q1. What is AWGN? A: Noise added to the signal, Gaussian-distributed, flat (white) power spectrum.
+# Q2. How does a moving average remove noise? A: It is a low-pass filter; averaging W samples reduces random noise variance by ~1/W.
+# Q3. Effect of a larger window? A: More noise removal but more smoothing/distortion of the signal.
+# Q4. What is SNR? A: Signal power / noise power (in dB = 10*log10(Ps/Pn)).
+# Q5. Name another filter. A: Butterworth / FIR low-pass filter.`},
+{t:"Q2. Cellular frequency reuse",q:"Simulate cellular frequency reuse:\nI. Define cluster size N and cell radius R.\nII. Calculate the minimum co-channel reuse distance.\nIII. Plot and label hexagonal cells using the same channel, showing distance between co-channel cell centres.",code:String.raw`import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.patches import RegularPolygon
+
+# I. Inputs (change as given in the question). N = i^2 + i*j + j^2
+N, R = 7, 1.0                         # cluster size, cell radius (km)
+i, j = next((a, b) for a in range(6) for b in range(a+1) if a*a + a*b + b*b == N)
+
+# II. Co-channel reuse distance: D = R*sqrt(3N)
+D = R*np.sqrt(3*N)
+print(f'N={N}, (i,j)=({i},{j}), R={R} km -> D = {D:.3f} km, D/R = {D/R:.3f}')
+
+# III. Plot hexagonal cells (pointy-top, centre spacing = sqrt(3)*R)
+u = np.sqrt(3)*R*np.array([1, 0])
+v = np.sqrt(3)*R*np.array([np.cos(np.pi/3), np.sin(np.pi/3)])
+fig, ax = plt.subplots(figsize=(8,8))
+co = []
+K = 2*(i+j) + 1
+for a in range(-K, K+1):
+    for b in range(-K, K+1):
+        c = a*u + b*v
+        if np.hypot(*c) > 1.25*D + R: continue
+        # same channel as centre cell if (a,b) lies in the lattice generated by (i,j) & (-j,i+j)
+        same = ((a*(i+j) + b*j) % N == 0) and ((-a*j + b*i) % N == 0)
+        ax.add_patch(RegularPolygon(c, 6, radius=R, facecolor='orange' if same else 'lightgrey', edgecolor='k'))
+        if same:
+            ax.text(*c, 'A', ha='center', va='center', fontweight='bold')
+            if (a, b) != (0, 0) and abs(np.hypot(*c) - D) < 1e-6: co.append(c)
+for c in co:                          # first-tier co-channel cells
+    ax.plot([0, c[0]], [0, c[1]], 'r--')
+    ax.text(c[0]/2, c[1]/2, f'D={D:.2f} km', color='r', fontsize=8, ha='center')
+ax.set_aspect('equal'); ax.autoscale_view(); ax.set_xlim(-1.4*D-R, 1.4*D+R); ax.set_ylim(-1.4*D-R, 1.4*D+R)
+ax.set_title(f'Frequency reuse: N={N}, R={R} km, D={D:.2f} km (cells "A" use the same channel)')
+plt.show()
+
+# VIVA Q&A
+# Q1. What is frequency reuse? A: Using the same channel set in different cells separated by enough distance to limit interference.
+# Q2. Formula for D? A: D = R*sqrt(3N); reuse ratio q = D/R = sqrt(3N).
+# Q3. Valid cluster sizes? A: N = i^2 + ij + j^2 -> 1, 3, 4, 7, 9, 12, ...
+# Q4. Effect of larger N? A: Less co-channel interference (higher D/R) but lower capacity (fewer channels per cell).
+# Q5. What is co-channel interference? A: Interference from other cells using the same frequency.`},
+{t:"Q3. 2.4 GHz Wi-Fi scan (WiFiman / Wi-Fi analyzer)",q:"Scan nearby 2.4 GHz networks at your assigned place:\nI. Record SSID, channel, RSSI and channel width of the lab Wi-Fi and nearby networks.\nII. Compare Channels 1, 6, 11 (number of networks, strongest competing RSSI).\nIII. Identify co-channel and overlapping networks w.r.t. the lab Wi-Fi.\nIV. Bar graph of networks on Channels 1, 6, 11.\nV. Recommend a channel and justify.",code:String.raw`import matplotlib.pyplot as plt
+
+# I. Readings from WiFiman (REPLACE with YOUR readings): (SSID, channel, RSSI dBm, width MHz)
+LAB = ('MWC_LAB_WiFi', 6, -45, 20)
+nets = [LAB, ('Hostel_5', 1, -60, 20), ('CSE_Lab', 1, -72, 20), ('Library_AP', 6, -58, 20),
+        ('Staff', 11, -66, 20), ('Guest', 11, -80, 20), ('Net_X', 3, -75, 20), ('Home', 9, -85, 20)]
+print(f"{'SSID':15}{'Ch':>4}{'RSSI':>7}{'Width':>7}")
+for s, c, r, w in nets: print(f'{s:15}{c:>4}{r:>7}{w:>7}')
+
+# II. Compare channels 1, 6, 11 (competing = all networks except the lab network)
+others = [n for n in nets if n != LAB]
+chs = [1, 6, 11]
+count = {c: sum(n[1] == c for n in nets) for c in chs}
+strong = {c: max([n[2] for n in others if n[1] == c], default=-100) for c in chs}
+for c in chs: print(f'Ch {c}: networks = {count[c]}, strongest competing RSSI = {strong[c]} dBm')
+
+# III. Co-channel (same channel) and overlapping (channel difference < 5; 2.4 GHz channels are 5 MHz apart, 20 MHz wide)
+co = [n[0] for n in others if n[1] == LAB[1]]
+ov = [n[0] for n in others if 0 < abs(n[1] - LAB[1]) < 5]
+print('Co-channel with lab:', co); print('Overlapping with lab:', ov)
+
+# IV. Bar graph
+plt.bar([str(c) for c in chs], [count[c] for c in chs], color=['tab:blue', 'tab:orange', 'tab:green'])
+plt.xlabel('Channel'); plt.ylabel('Detected networks'); plt.title('Networks on Channels 1, 6, 11'); plt.show()
+
+# V. Recommendation: fewest networks, then weakest competing RSSI
+best = min(chs, key=lambda c: (sum(n[1] == c for n in others), strong[c]))
+print('Recommended channel:', best, '-> fewest networks and weakest competing signal (least interference).')
+
+# VIVA Q&A
+# Q1. Why only channels 1, 6, 11? A: They are the only three non-overlapping 20 MHz channels in 2.4 GHz.
+# Q2. What is RSSI? A: Received signal strength in dBm; closer to 0 is stronger (-45 strong, -85 weak).
+# Q3. Co-channel vs adjacent-channel interference? A: Co-channel networks share airtime (CSMA/CA); overlapping ones corrupt each other's signal (worse).
+# Q4. How many channels in 2.4 GHz? A: 14 (1-13 in India), spaced 5 MHz, each 20 MHz wide.
+# Q5. Why is 5 GHz better? A: More non-overlapping channels, less congestion.`},
+{t:"Q4. Wireless LAN in Cisco Packet Tracer (RTT, throughput)",q:"Configure a wireless LAN (router, server, laptop) through the GUI:\nI. Configure devices and establish connectivity.\nII. Record min, max, avg RTT with ping (default and 1500-byte).\nIII. Simulation Mode: record send/arrival timestamps for a 2000-byte payload.\nIV. Calculate total packet size, RTT interval, throughput (bps, kbps).\nV. Repeat 3 times, compare, comment on packet size vs latency.",code:String.raw`import numpy as np
+
+# I. GUI STEPS (Packet Tracer)
+# 1. Place Wireless Router (e.g. WRT300N), Server-PT, Laptop-PT. Connect Server to router LAN port (Copper Straight-Through).
+# 2. Laptop: Physical tab -> power off, replace wired card with WMP300N wireless module, power on.
+# 3. Router: GUI -> Wireless -> SSID = MWC_LAB, Setup -> DHCP enabled. Server: Config -> FastEthernet0 -> static IP 192.168.0.10.
+# 4. Laptop: Config -> Wireless0 -> SSID MWC_LAB, IP via DHCP. Check: Desktop -> Command Prompt -> ping 192.168.0.10.
+
+# II. Ping results (ms) - ENTER from Command Prompt: "ping 192.168.0.10" and "ping -l 1500 192.168.0.10"
+ping = {'Default (32 B)': (3, 12, 6), '1500 B': (8, 25, 14)}          # (min, max, avg)
+for k, (mn, mx, av) in ping.items(): print(f'{k}: min={mn} ms, max={mx} ms, avg={av} ms')
+
+# III. Simulation Mode: use Capture/Forward on the ICMP packet (ping -l 2000); note send & arrival times (s)
+trials = [(0.000, 0.012), (0.000, 0.014), (0.000, 0.011)]             # (t_send, t_arrive) - REPLACE
+
+# IV. Calculations
+payload = 2000                         # bytes
+total = payload + 8 + 20 + 14          # + ICMP(8) + IP(20) + Ethernet(14) headers = 2042 bytes (adjust if you include 802.11 header)
+tp = []
+for n, (ts, ta) in enumerate(trials, 1):
+    rtt = ta - ts                      # round-trip time interval (s)
+    bps = total*8 / rtt                # throughput = bits / time
+    tp.append(bps)
+    print(f'Trial {n}: size={total} B, RTT={rtt*1000:.1f} ms, throughput={bps:.0f} bps = {bps/1000:.2f} kbps')
+
+# V. Comparison
+print(f'Average throughput = {np.mean(tp)/1000:.2f} kbps, spread = {np.ptp(tp)/1000:.2f} kbps')
+# Comment: larger packets have higher RTT (more transmission time; 2000 B > MTU 1500 B so it is fragmented into 2 packets).
+# Small differences between trials come from wireless medium access (CSMA/CA) and ARP in the first ping.
+
+# VIVA Q&A
+# Q1. What is RTT? A: Time for a packet to reach the destination and its reply to return.
+# Q2. Why is the first ping slower / lost? A: ARP resolution (and DHCP/association) happens first.
+# Q3. Throughput formula? A: Throughput = total bits transferred / time taken.
+# Q4. Why does latency rise with packet size? A: Transmission delay = L/R grows with packet length L; fragmentation adds more.
+# Q5. What is MTU? A: Maximum Transmission Unit - largest frame payload (1500 B for Ethernet).`},
+{t:"Q5. Free-space path loss (700 / 900 MHz)",q:"Calculate and analyze free-space path loss:\nI. Vary distance 1 m to 50 m at 700 MHz and 900 MHz.\nII. Plot path loss vs distance for both frequencies.\nIII. Vary frequency 700 to 900 MHz at fixed distances 400 m and 800 m.\nIV. Plot path loss vs frequency for both distances.\nV. Compare graphs, comment on effect of distance and frequency.",code:gen(700,900,400,800)},
+{t:"Q6. Free-space path loss (1800 / 2100 MHz)",q:"Calculate and analyze free-space path loss:\nI. Vary distance 1 m to 50 m at 1800 MHz and 2100 MHz.\nII. Plot path loss vs distance for both frequencies.\nIII. Vary frequency 1800 to 2100 MHz at fixed distances 600 m and 1200 m.\nIV. Plot path loss vs frequency for both distances.\nV. Compare graphs, comment on effect of distance and frequency.",code:gen(1800,2100,600,1200)},
+{t:"Q7. Smartphone network diagnostics (RSRP, RSRQ, SINR)",q:"Using a smartphone diagnostic app at your assigned place:\nI. Record network type, RSRP, RSRQ and SINR.\nII. Record three readings at 1-minute intervals and calculate averages.\nIII. Classify signal strength and comment on quality.\nIV. Explain significance of RSRP, RSRQ and SINR.",code:String.raw`import numpy as np
+
+# I & II. Readings (REPLACE with your app values, e.g. Network Cell Info / Network Signal Guru)
+network = '4G (LTE)'
+rsrp = [-92, -95, -93]                # dBm
+rsrq = [-11, -12, -11]                # dB
+sinr = [14, 12, 13]                   # dB
+print('Network type:', network)
+for m in range(3): print(f'Reading {m+1} (t={m} min): RSRP={rsrp[m]} dBm, RSRQ={rsrq[m]} dB, SINR={sinr[m]} dB')
+a_p, a_q, a_s = np.mean(rsrp), np.mean(rsrq), np.mean(sinr)
+print(f'Average RSRP={a_p:.1f} dBm, RSRQ={a_q:.1f} dB, SINR={a_s:.1f} dB')
+
+# III. Classification (typical LTE thresholds)
+def grade(v, lims):                   # lims: thresholds for Excellent / Good / Fair
+    return 'Excellent' if v >= lims[0] else 'Good' if v >= lims[1] else 'Fair' if v >= lims[2] else 'Poor'
+print('RSRP :', grade(a_p, (-80, -90, -100)))   # >=-80 Exc, -80..-90 Good, -90..-100 Fair, <-100 Poor
+print('RSRQ :', grade(a_q, (-10, -15, -20)))    # >=-10 Exc, -10..-15 Good, -15..-20 Fair, <-20 Poor
+print('SINR :', grade(a_s, (20, 13, 0)))        # >=20 Exc, 13..20 Good, 0..13 Fair, <0 Poor
+# Comment: write overall quality, e.g. "Signal is Fair-Good: usable for browsing/video, speed moderate."
+
+# IV. SIGNIFICANCE
+# RSRP (Reference Signal Received Power): average power of LTE reference signals; measures coverage / distance from tower.
+# RSRQ (Reference Signal Received Quality) = N*RSRP/RSSI; measures quality, accounting for interference and load.
+# SINR (Signal to Interference plus Noise Ratio): directly decides data rate and modulation (higher SINR -> 64/256-QAM).
+
+# VIVA Q&A
+# Q1. Difference between RSRP and RSSI? A: RSSI is total wideband power (signal+noise+interference); RSRP is only reference-signal power.
+# Q2. Good RSRP value? A: Better than -90 dBm; below -110 dBm is very poor.
+# Q3. Why can RSRP be good but speed low? A: Low SINR/RSRQ due to interference or heavy load.
+# Q4. What decides handover? A: RSRP/RSRQ comparison of serving vs neighbour cell.
+# Q5. 5G equivalents? A: SS-RSRP, SS-RSRQ, SS-SINR.`},
+{t:"Q8. WLAN security in Cisco Packet Tracer (WPA2 and MAC filtering)",q:"Configure a wireless LAN through the GUI:\nI. Router with SSID MWC_LAB, connect two laptops, verify with ping.\nII. WPA2-Personal (AES), password MWC@12345; authorized laptop connects, wrong password is rejected.\nIII. Enable MAC filtering to permit only the authorized laptop.\nIV. Record connection and ping results in an observation table.\nV. Explain how WPA2 and MAC filtering improve security.",code:String.raw`# I. GUI STEPS (Packet Tracer)
+# 1. Add Wireless Router + 2 Laptop-PT; replace wired card with WMP300N in both laptops.
+# 2. Router -> GUI -> Wireless -> SSID = MWC_LAB. Laptops: Config -> Wireless0 -> SSID MWC_LAB (DHCP). Ping router/other laptop.
+# II. Router -> Wireless -> Security -> WPA2-Personal, Encryption = AES, Passphrase = MWC@12345.
+#     Laptop1: Authentication WPA2-PSK, PSK = MWC@12345 -> connects.  Laptop2: PSK = wrong123 -> rejected.
+# III. Router -> Wireless -> Wireless MAC Filter -> Enabled, "Permit PCs listed below", add Laptop1 MAC
+#      (Laptop -> Config -> Wireless0 -> MAC Address). Laptop2 (even with correct password) must fail.
+
+# IV. Observation table (update Result/Ping with what you actually observe)
+rows = [('Open network (no security)', 'Laptop1', 'Connected', 'Success'),
+        ('Open network (no security)', 'Laptop2', 'Connected', 'Success'),
+        ('WPA2-PSK (correct password)', 'Laptop1', 'Connected', 'Success'),
+        ('WPA2-PSK (wrong password)',   'Laptop2', 'Rejected',  'Failed (request timed out)'),
+        ('WPA2 + MAC filter',           'Laptop1 (authorized)',   'Connected', 'Success'),
+        ('WPA2 + MAC filter',           'Laptop2 (unauthorized)', 'Rejected',  'Failed (request timed out)')]
+print(f"{'Security stage':30}{'Laptop':24}{'Connection':13}{'Ping'}")
+for r in rows: print(f'{r[0]:30}{r[1]:24}{r[2]:13}{r[3]}')
+
+# V. EXPLANATION
+# WPA2-Personal: client and router share a pre-shared key (PSK); a 4-way handshake derives unique session keys,
+#   and AES-CCMP encrypts all frames, so only users with the password can join and eavesdropping is prevented.
+# MAC filtering: router accepts only listed hardware addresses, adding a second layer (device authorization).
+#   It is weak alone because MAC addresses can be spoofed, so it is used together with WPA2.
+
+# VIVA Q&A
+# Q1. WPA2 vs WEP? A: WEP uses weak RC4/static keys and is easily cracked; WPA2 uses AES-CCMP and a 4-way handshake.
+# Q2. What is SSID? A: Service Set Identifier - the name of the wireless network.
+# Q3. What is a MAC address? A: 48-bit unique hardware address of a network interface.
+# Q4. Why is the wrong-password laptop rejected? A: It derives a different key, so the handshake fails.
+# Q5. Personal vs Enterprise? A: Personal uses a shared password; Enterprise uses 802.1X/RADIUS with per-user credentials.`}
+];
+const X=[
+{th:"A digital communication system has a Transmitter (Tx), a Channel and a Receiver (Rx). AWGN adds zero-mean Gaussian noise with a flat power spectrum: y(t) = x(t) + n(t), and SNR(dB) = 10·log10(Ps/Pn).\nA moving-average filter of window W replaces each sample by the mean of W neighbouring samples, y[n] = (1/W)·Σ x[n-k]. It acts as a low-pass filter: random noise variance falls by about 1/W while the slow sine is kept.",
+out:String.raw`(No console output - three separate figures are produced)
+Figure 1: Transmitted signal  - clean 5 Hz sine, amplitude +/-1, 5 cycles in 1 s.
+Figure 2: Noisy channel output - same sine with random fluctuations (SNR = 10 dB).
+Figure 3: Recovered signal    - smooth sine close to the original, noise strongly reduced.`,
+con:"The sine wave was transmitted, corrupted by AWGN in the channel and recovered at the receiver with a sliding-window moving-average filter. The filter greatly reduced the noise, so the recovered signal closely matches the transmitted one. A larger window removes more noise but smooths (distorts) the signal more."},
+{th:"Frequency reuse means using the same channel set in different cells that are far enough apart. A cluster of N cells (N = i² + ij + j²) shares all available channels.\nMinimum co-channel reuse distance: D = R·√(3N), where R is the cell radius. Reuse ratio q = D/R = √(3N).\nLarger N gives larger D (less co-channel interference) but fewer channels per cell (lower capacity).",
+out:String.raw`N=7, (i,j)=(2,1), R=1.0 km -> D = 4.583 km, D/R = 4.583
+Figure: hexagonal cell layout; cells marked 'A' use the same channel; red dashed lines join the central cell to the six first-tier co-channel cells, each labelled D = 4.58 km.`,
+con:"For N = 7 and R = 1 km the minimum co-channel reuse distance is D = R·√(3N) = 4.58 km (q = 4.58). The plot shows the six nearest co-channel cells at this distance. A larger cluster size increases D and reduces interference, but decreases capacity."},
+{th:"The 2.4 GHz Wi-Fi band has channels spaced 5 MHz apart, each about 20 MHz wide, so only channels 1, 6 and 11 are non-overlapping.\nRSSI (dBm) is the received signal strength: -30 to -50 excellent, -50 to -67 good, -67 to -80 fair, below -80 weak.\nCo-channel networks share airtime (CSMA/CA); partially overlapping channels corrupt each other's frames and are worse.",
+out:String.raw`SSID             Ch   RSSI  Width
+MWC_LAB_WiFi      6    -45     20
+Hostel_5          1    -60     20
+CSE_Lab           1    -72     20
+Library_AP        6    -58     20
+Staff            11    -66     20
+Guest            11    -80     20
+Net_X             3    -75     20
+Home              9    -85     20
+Ch 1: networks = 2, strongest competing RSSI = -60 dBm
+Ch 6: networks = 2, strongest competing RSSI = -58 dBm
+Ch 11: networks = 2, strongest competing RSSI = -66 dBm
+Co-channel with lab: ['Library_AP']
+Overlapping with lab: ['Net_X', 'Home']
+Recommended channel: 6
+Figure: bar graph, Channels 1, 6, 11 = 2, 2, 2 networks   (sample data - replace with your readings)`,
+con:"The laboratory network and its neighbours were scanned and compared on channels 1, 6 and 11. Co-channel and overlapping networks were identified from their channel numbers. The channel with the fewest competing networks and the weakest competing RSSI is recommended, because it gives the least interference and best throughput. (Update the numbers with your own observations.)"},
+{th:"RTT is the time for a packet to reach the destination and for its reply to return. Throughput = total bits transferred / time taken (bps). Total packet size = payload + headers (ICMP 8 B + IP 20 B + Ethernet 14 B).\nTransmission delay = L/R, so larger packets take longer. Payloads above the 1500-byte MTU are fragmented, adding more delay. The first ping is slower because of ARP resolution.",
+net:"Laptop0 (WMP300N wireless card, DHCP)  ~~ SSID MWC_LAB ~~  Wireless Router0 (192.168.0.1)  --- Copper Straight-Through ---  Server0 (192.168.0.10)",
+out:String.raw`Default (32 B): min=3 ms, max=12 ms, avg=6 ms
+1500 B: min=8 ms, max=25 ms, avg=14 ms
+Trial 1: size=2042 B, RTT=12.0 ms, throughput=1361333 bps = 1361.33 kbps
+Trial 2: size=2042 B, RTT=14.0 ms, throughput=1166857 bps = 1166.86 kbps
+Trial 3: size=2042 B, RTT=11.0 ms, throughput=1485091 bps = 1485.09 kbps
+Average throughput = 1337.76 kbps, spread = 318.23 kbps   (sample values - use your Packet Tracer readings)`,
+con:"The wireless LAN was configured and connectivity verified using ping. RTT for 1500-byte packets was higher than for the default packet, and the 2000-byte payload (fragmented) took longer still, so latency rises with packet size. Throughput varied slightly across the three trials because of wireless medium access and ARP."},
+{th:"Free-space path loss (FSPL) is the power lost by a signal travelling in line of sight: FSPL(dB) = 20·log10(d_km) + 20·log10(f_MHz) + 32.44.\nLoss grows logarithmically with distance and frequency: doubling either one adds about 6 dB. Lower frequencies have less loss, hence longer range.",
+out:String.raw`FSPL @10 m, 700 MHz = 49.34 dB
+FSPL @10 m, 900 MHz = 51.52 dB
+FSPL @400 m, 700 MHz = 81.38 dB
+FSPL @800 m, 700 MHz = 87.4 dB
+
+Distance (m) | 700 MHz | 900 MHz        Frequency (MHz) | 400 m  | 800 m
+1            | 29.34   | 31.52          700             | 81.38  | 87.40
+10           | 49.34   | 51.52          900             | 83.57  | 89.59
+50           | 63.32   | 65.50
+Figures: (1) FSPL vs distance, two rising curves; (2) FSPL vs frequency, two nearly flat rising lines.`,
+con:"Path loss increases with distance (about +6 dB per doubling) and with frequency. The 900 MHz curve lies 2.2 dB above the 700 MHz curve (20·log10(900/700)). Over 700-900 MHz the loss changes by only ~2.2 dB, whereas moving from 400 m to 800 m adds 6 dB, so distance has the larger effect."},
+{th:"Free-space path loss (FSPL) is the power lost by a signal travelling in line of sight: FSPL(dB) = 20·log10(d_km) + 20·log10(f_MHz) + 32.44.\nLoss grows logarithmically with distance and frequency: doubling either one adds about 6 dB. Higher frequencies (1800/2100 MHz) suffer more loss than low bands, so they need smaller cells.",
+out:String.raw`FSPL @10 m, 1800 MHz = 57.55 dB
+FSPL @10 m, 2100 MHz = 58.88 dB
+FSPL @600 m, 1800 MHz = 93.11 dB
+FSPL @1200 m, 1800 MHz = 99.13 dB
+
+Distance (m) | 1800 MHz | 2100 MHz       Frequency (MHz) | 600 m  | 1200 m
+1            | 37.55    | 38.88          1800            | 93.11  | 99.13
+10           | 57.55    | 58.88          2100            | 94.45  | 100.47
+50           | 71.52    | 72.86
+Figures: (1) FSPL vs distance, two rising curves; (2) FSPL vs frequency, two nearly flat rising lines.`,
+con:"Path loss increases with distance (about +6 dB per doubling) and with frequency. The 2100 MHz curve is 1.34 dB above the 1800 MHz curve (20·log10(2100/1800)). Over 1800-2100 MHz the change is only ~1.3 dB, while doubling the distance from 600 m to 1200 m adds 6 dB, so distance dominates."},
+{th:"RSRP (Reference Signal Received Power) measures LTE coverage. RSRQ = N·RSRP/RSSI measures quality, including interference and load. SINR is signal power divided by interference plus noise and decides data rate and modulation.\nTypical grades - RSRP: >= -80 excellent, -80 to -90 good, -90 to -100 fair, < -100 poor. RSRQ: >= -10 excellent, -10 to -15 good, -15 to -20 fair. SINR: >= 20 excellent, 13-20 good, 0-13 fair, < 0 poor.",
+out:String.raw`Network type: 4G (LTE)
+Reading 1 (t=0 min): RSRP=-92 dBm, RSRQ=-11 dB, SINR=14 dB
+Reading 2 (t=1 min): RSRP=-95 dBm, RSRQ=-12 dB, SINR=12 dB
+Reading 3 (t=2 min): RSRP=-93 dBm, RSRQ=-11 dB, SINR=13 dB
+Average RSRP=-93.3 dBm, RSRQ=-11.3 dB, SINR=13.0 dB
+RSRP : Fair
+RSRQ : Good
+SINR : Good   (sample values - use your app readings)`,
+con:"The 4G network showed an average RSRP of -93.3 dBm (fair coverage), RSRQ of -11.3 dB (good quality) and SINR of 13 dB (good). The signal is fair-to-good, enough for browsing and video. RSRP indicates coverage, RSRQ indicates quality and SINR indicates the achievable data rate."},
+{th:"WPA2-Personal uses a pre-shared key (PSK); a 4-way handshake derives unique session keys and AES-CCMP encrypts every frame, so only users with the password can join and eavesdropping is prevented.\nMAC address filtering permits only listed hardware addresses, adding device-level authorization. It can be spoofed, so it is used together with WPA2.",
+net:"Laptop1 (authorized)  ~~ SSID MWC_LAB ~~  Wireless Router0 (WPA2-PSK / AES, MAC filter)  ~~ SSID MWC_LAB ~~  Laptop2 (unauthorized)",
+out:String.raw`Security stage                Laptop                  Connection   Ping
+Open network (no security)    Laptop1                 Connected    Success
+Open network (no security)    Laptop2                 Connected    Success
+WPA2-PSK (correct password)   Laptop1                 Connected    Success
+WPA2-PSK (wrong password)     Laptop2                 Rejected     Failed (request timed out)
+WPA2 + MAC filter             Laptop1 (authorized)    Connected    Success
+WPA2 + MAC filter             Laptop2 (unauthorized)  Rejected     Failed (request timed out)`,
+con:"The WLAN with SSID MWC_LAB was configured and pings succeeded on the open network. After enabling WPA2-Personal (AES), only the laptop with the correct password MWC@12345 connected. With MAC filtering added, only the authorized laptop was allowed. WPA2 provides encryption and authentication, and MAC filtering adds device-level control, together improving wireless security."}
+];
+
+/* ---- build ONE copyable block: Theory / Program / Output / Conclusion (all non-program parts as # comments) ---- */
+function wrap(s,w){return s.split('\n').flatMap(l=>{if(l.length<=w)return [l];const o=[];let cur='';l.split(' ').forEach(x=>{if((cur?cur+' '+x:x).length>w){o.push(cur);cur=x}else cur=cur?cur+' '+x:x});o.push(cur);return o})}
+const cm=(s,w=95)=>wrap(s,w).map(l=>l?'# '+l:'#').join('\n');
+const bar='# '+'='.repeat(70);
+const sect=n=>bar+'\n# '+n+'\n'+bar;
+function full(i){
+ const x=Q[i],e=X[i],pt=(i==3||i==7),p=[];
+ p.push(sect(x.t));
+ p.push(cm('QUESTION:\n'+x.q));
+ if(e.th)p.push(sect('THEORY (Optional)')+'\n'+cm(e.th));
+ let prog=sect(pt?'PACKET TRACER NETWORK STEPS + CALCULATION PROGRAM':'PYTHON PROGRAM');
+ if(e.net)prog+='\n'+cm('NETWORK (TOPOLOGY): '+e.net);
+ p.push(prog+'\n\n'+x.code);
+ p.push(sect('OUTPUT / OBSERVATION TABLE')+'\n'+cm(e.out,1e9));
+ p.push(sect('CONCLUSION')+'\n'+cm(e.con));
+ return p.join('\n\n')+'\n';
+}
+
+
+/* ================= VS Code UI ================= */
+const FN=['q1_digital_comm.py','q2_freq_reuse.py','q3_wifi_scan.py','q4_packet_tracer.py','q5_fspl_700_900.py','q6_fspl_1800_2100.py','q7_lte_signal.py','q8_wlan_security.py'];
+const CTRL=new Set(['import','from','for','if','else','elif','return','while','continue']);
+const KW=new Set(['def','as','in','and','or','not','lambda','True','False','None','is']);
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const TOK=/(#.*)|((?:[fFrR]{1,2})?(?:"[^"\n]*"|'[^'\n]*'))|\b(\d+\.?\d*)\b|\b([A-Za-z_]\w*)\b(\s*\()?/g;
+function hl(line){
+  let o='',last=0,m;TOK.lastIndex=0;
+  while((m=TOK.exec(line))){
+    o+=esc(line.slice(last,m.index));
+    const c=m[1],s=m[2],n=m[3],w=m[4],p=m[5];
+    if(c)o+='<i class=cm>'+esc(c)+'</i>';
+    else if(s)o+='<i class=st>'+esc(s)+'</i>';
+    else if(n)o+='<i class=nm>'+n+'</i>';
+    else{
+      const cls=CTRL.has(w)?'kc':KW.has(w)?'kk':p?'fn':'va';
+      o+='<i class='+cls+'>'+w+'</i>'+esc(p||'');
+    }
+    last=TOK.lastIndex;
+  }
+  return o+esc(line.slice(last));
+}
+async function copy(text){try{await navigator.clipboard.writeText(text);return 1}catch(e){const a=document.createElement('textarea');a.value=text;a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();let ok=false;try{ok=document.execCommand('copy')}catch(x){}a.remove();return ok}}
+const $=id=>document.getElementById(id);
+let cur=0;
+function rowsHtml(i){
+  return full(i).replace(/\n$/,'').split('\n').map((l,k)=>'<div class="row" data-n="'+(k+1)+'"><span class="ln">'+(k+1)+'</span><span class="lc">'+hl(l)+'</span></div>').join('');
+}
+function preview(i){
+  const x=Q[i],e=X[i],pt=(i==3||i==7),br=s=>esc(s).replace(/\n/g,'<br>');
+  let h='<span class="bdg"><b>practical</b><i>Q'+(i+1)+'</i></span><span class="bdg"><b>type</b><i>'+(pt?'packet tracer':'python')+'</i></span>';
+  h+='<h2>'+esc(x.t)+'</h2>';
+  h+='<h2>The Question</h2><p>'+br(x.q)+'</p>';
+  if(e.th)h+='<h2>Theory</h2><p>'+br(e.th)+'</p>';
+  if(e.net)h+='<h2>Network Topology</h2><p><code>'+esc(e.net)+'</code></p>';
+  h+='<h2>Output / Observation Table</h2><pre>'+esc(e.out)+'</pre>';
+  h+='<h2>Conclusion</h2><p>'+esc(e.con)+'</p>';
+  h+='<p>Press <a>Copy code</a> in the editor to copy the program together with theory, output and conclusion as comments.</p>';
+  return h;
+}
+function setLn(n){
+  const old=document.querySelector('.row.cur');if(old)old.classList.remove('cur');
+  const r=document.querySelector('.row[data-n="'+n+'"]');if(r)r.classList.add('cur');
+  $('ln').textContent='Ln '+n+', Col 1';
+}
+function show(i){
+  cur=i;
+  $('tl').innerHTML=FN.map((n,k)=>'<div class="tab'+(k==i?' on':'')+'" data-i="'+k+'"><span class="ic">PY</span><span>'+n+'</span><span class="x">×</span></div>').join('');
+  $('bc').innerHTML='<span>mwc_practicals</span><span class="sep">›</span><span>practicals</span><span class="sep">›</span><span class="ic">PY</span><span>'+FN[i]+'</span><span class="sep">›</span><span>…</span>';
+  $('ed').innerHTML='<div class="rows">'+rowsHtml(i)+'</div>';
+  $('ed').scrollTop=0;$('ed').scrollLeft=0;
+  $('ptn').textContent='Preview Q'+(i+1)+'.md';
+  $('pv').innerHTML=preview(i);$('pv').scrollTop=0;
+  const t=document.querySelector('#tl .tab.on');if(t)$('tl').scrollLeft=Math.max(0,t.offsetLeft-40);
+  setLn(1);
+}
+$('tl').onclick=e=>{const t=e.target.closest('.tab');if(t)show(+t.dataset.i)};
+$('ed').onclick=e=>{const r=e.target.closest('.row');if(r)setLn(+r.dataset.n)};
+$('cpb').onclick=async()=>{
+  const b=$('cpb'),ok=await copy(full(cur));
+  b.textContent=ok?'✓ Copied!':'Press Ctrl+C';b.classList.toggle('ok',!!ok);
+  setTimeout(()=>{b.textContent='⧉ Copy code';b.classList.remove('ok')},1800);
+};
+const tick=()=>{$('clk').textContent=new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})};tick();setInterval(tick,30000);
+show(0);
+</script></body></html>
